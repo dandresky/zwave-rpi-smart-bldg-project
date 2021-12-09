@@ -1,0 +1,17 @@
+{
+  "name": "hackathon-2021-zwave",
+  "version": "1.0.0",
+  "description": "POC for a Mersive room automation idea",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "zwave-js": "^8.8.3"
+  },
+  "type": "module"
+}
