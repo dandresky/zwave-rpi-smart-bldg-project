@@ -1,0 +1,40 @@
+{
+    "devicesInNetwork" : [
+        {
+            "nodeId" : 2,
+            "name" : "Front Light Switch",
+            "description" : "Outdoor light switch at front of house",
+            "deviceType" : ""
+        },
+        {
+            "nodeId" : 3,
+            "name" : "Back Light Switch",
+            "description" : "Outdoor light switch at back of house",
+            "deviceType" : ""
+        },
+        {
+            "nodeId" : 4,
+            "name" : "Light Sensor",
+            "description" : "Outdoor ambient light sensor",
+            "deviceType" : ""
+        },
+        {
+            "nodeId" : 5,
+            "name" : "Relay 1",
+            "description" : "Hydroponics Relay",
+            "deviceType" : ""
+        },
+        {
+            "nodeId" : 8,
+            "name" : "Relay 2",
+            "description" : "Backyard Dripline",
+            "deviceType" : ""
+        },
+        {
+            "nodeId" : 10,
+            "name" : "Relay 3",
+            "description" : "Front and side drip line",
+            "deviceType" : ""
+        }
+    ]
+}

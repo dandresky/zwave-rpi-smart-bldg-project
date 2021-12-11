@@ -18,13 +18,6 @@ const port = 3001
 // Adjust the serial port depending on the platform you run this app
 const driver = new Driver(serialPort)
 
-// You must add a handler for the error event before starting the driver
-driver.on("error", (e) => {
-    // Do something with it
-    console.error(e)
-});
-
-
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -34,151 +27,98 @@ driver.on("error", (e) => {
 // "driver ready" event fired after controller interview is complete. We know the
 // nodes previously included, but they are still being interviewed.
 driver.once("driver ready", () => {
-    // Log some info
     console.log("\'driver ready\' event fired")
     console.log("  Network (controller) Home ID: " + driver.controller.homeId.toString())
     driver.controller.nodes.forEach((node) => {
-        node.on("ready", async () => { 
-            console.log("\'ready\' event fired")
-            console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.basic.label));  
-                    
-            const switchCCApi = node.commandClasses['Binary Switch']
-            if (switchCCApi.isSupported()) {
-                console.log(`Node ${node.id} is a switch!`);
-                lightSwitch = switchCCApi
-            }
+        node.once("ready", async () => { 
+            processEvent("node on ready")
 
-            node.on('value updated', async (_node, args) => {
-                console.log(`value updated node=${node.nodeId} CC=${args.propertyKey} newValue=${args.newValue}`);
-
-                // Wake the display and turn on lights when motion is detected
-                if(args.propertyKey === "Motion sensor status") {
-                    console.log("Turning on things...");
-                    // WAKE DISPLAY
-                    if(lightSwitch !== undefined) {
-                        lightSwitch.set(true);
-                    }
-                    if(timer !== undefined) {
-                        clearTimeout(timer);
-                    }
-                    timer = setTimeout(() => {
-                        // SUSPEND DISPLAY
-                        if(lightSwitch !== undefined) {
-                            lightSwitch.set(false);
-                        }
-                    }, 60000)
-                } 
-
-                // Show emergency message when the alarm goes off
-                if(args.propertyKey === "Alarm status") {
-                    if(args.newValue === 3) {
-                        console.log("Alarm sounded!")
-                        // SEND EMERGENCY MESSAGE
-                        // STRETCH GOAL - UNLOCK DOORS
-                    }
-                    if(args.newValue === 0) {
-                        console.log("Alarm cleared")
-                        // CLEAR EMERGENCY MESSAGE
-                    }
-                }
+            node.once("value updated", async (_node, args) => {
+                processEvent("node on value updated")
             })
 
-            // NOTE: We observed that when this code block is NOT here we will sometimes not capture the 
-            // fire alarm's value updated event. We are mystified!
-            node.on('value notification', async (_node, args) => {
-                console.log(`value notification node=${node.nodeId} CC=${args.propertyKey} newValue=${args.newValue}`);
-                
-                // Show emergency message when the alarm goes off
-                if(args.propertyKey === "Alarm status") {
-                    if(args.newValue === 3) {
-                        console.log("Alarm sounded 2!")
-                        // SEND EMERGENCY MESSAGE
-                        // STRETCH GOAL - UNLOCK DOORS
-                    }
-                    if(args.newValue === 0) {
-                        console.log("Alarm cleared 2")
-                        // CLEAR EMERGENCY MESSAGE
-                    }
-                }
+            node.once("value notification", async (_node, args) => {
+                processEvent("node on value notification")
             })
 
-            node.on("asleep", () => {
+            node.once("asleep", () => {
                 console.log("\'asleep\' node event fired")
-                // ToDo: When is this fired? By battery powered devices cycling off? 
-                //       Do we care?
+                // ToDo: When is this fired? By battery powered devices cycling off? What to do?
             });
 
-            node.on("wakeup", () => {
+            node.once("wakeup", () => {
                 console.log("\'wakeup\' node event fired")
-                // ToDo: When is this fired? By battery powered devices cycling on? 
-                //       Is this when notify an actuator that signed up for event?
+                // ToDo: When is this fired? By battery powered devices cycling on? What to do?
             });
         });
-        //console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.basic.label));
-        // console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.generic.label));
-        // ToDo: is this where we should querry if it is a failed node?
     });
 
-    driver.controller.on("inclusion started", () => {
+    driver.controller.once("inclusion started", () => {
         console.log("\'inclusion started\' controller event fired")
         // ToDo: Do we care about this event?
     });
     
-    driver.controller.on("exclusion started", () => {
+    driver.controller.once("exclusion started", () => {
         console.log("\'exclusion started\' controller event fired")
         // ToDo: Do we care about this event?
     });
     
-    driver.controller.on("inclusion failed", () => {
+    driver.controller.once("inclusion failed", () => {
         console.log("\'inclusion failed\' controller event fired")
         // ToDo: log a detailed message for this failure. Does this function get an error parameter?
     });
     
-    driver.controller.on("exclusion failed", () => {
+    driver.controller.once("exclusion failed", () => {
         console.log("\'exclusion failed\' controller event fired")
         // ToDo: log a detailed message for this failure. Does this function get an error parameter?
     });
     
-    driver.controller.on("inclusion stopped", () => {
+    driver.controller.once("inclusion stopped", () => {
         console.log("\'inclusion stopped\' controller event fired")
         // ToDo: this is fired when a node has been successfully included. What action do we need to take?
         //       Determine if a sensor or actuator? If actuator, sign it up for sensor events?
         //       Do it here or in node added?
     });
     
-    driver.controller.on("exclusion stopped", () => {
+    driver.controller.once("exclusion stopped", () => {
         console.log("\'exclusion stopped\' controller event fired")
         // ToDo: this is fired when a node has been successfully excluded. If it was a sensor, then
         // make sure there aren't any actuators listening for events.
         // Do it here or in node removed?
     });
 
-    driver.controller.on("node added", () => {
+    driver.controller.once("node added", () => {
         console.log("\'node added\' controller event fired")
         // ToDo: this is fired when a node has been added. Should we respond to this or
         // inclusion stopped?
     });
 
-    driver.controller.on("node removed", () => {
+    driver.controller.once("node removed", () => {
         console.log("\'node removed\' controller event fired")
         // ToDo: this is fired when a node has been removed. Should we respond to this or
         // exclusion stopped?
     });
 
-    driver.controller.on("heal network progress", () => {
+    driver.controller.once("heal network progress", () => {
         console.log("\'heal network progress\' controller event fired")
         // ToDo: this is fired when we request a status? This is future.
     });
 
-    driver.controller.on("heal network done", () => {
+    driver.controller.once("heal network done", () => {
         console.log("\'heal network done\' controller event fired")
         // ToDo: This is future
     });
 
-    driver.controller.on("statistics updated", () => {
+    driver.controller.once("statistics updated", () => {
         console.log("\'statistics updated\' controller event fired")
         // ToDo: implement some detailed logs to show us the stats
     });
+});
+
+// You must add a handler for the error event before starting the driver
+driver.on("error", (e) => {
+    // Do something with it
+    console.error(e)
 });
 
 
@@ -200,33 +140,125 @@ for (const signal of ["SIGINT", "SIGTERM"]) {
 
 
 ////////////////////////////////////////////////////////////////////////////////////
-// html request processing for testing
+// event processing
+// ToDo: break out into independent modules?
+////////////////////////////////////////////////////////////////////////////////////
+const processEvent = (eventName) => {
+    switch(eventName) {
+        case "node on ready":
+            // 
+            console.log("\'ready\' event fired")
+            console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.basic.label));  
+                    
+            const switchCCApi = node.commandClasses['Binary Switch']
+            if (switchCCApi.isSupported()) {
+                console.log(`Node ${node.id} is a switch!`);
+                lightSwitch = switchCCApi
+            }
+            break;
+
+        case "node on value updated":
+            // A node has updated its value. See which one and act on it.
+            console.log("\'value updated\' event fired")
+            console.log(`  value updated node=${node.nodeId} CC=${args.propertyKey} newValue=${args.newValue}`);
+
+            // Wake the display and turn on lights when motion is detected
+            if(args.propertyKey === "Motion sensor status") {
+                console.log("Turning on lights...");
+                // WAKE DISPLAY
+                if(lightSwitch !== undefined) {
+                    lightSwitch.set(true);
+                }
+                if(timer !== undefined) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(() => {
+                    // SUSPEND DISPLAY
+                    if(lightSwitch !== undefined) {
+                        lightSwitch.set(false);
+                    }
+                }, 60000)
+            } 
+
+            // Show emergency message when the alarm goes off
+            if(args.propertyKey === "Alarm status") {
+                if(args.newValue === 3) {
+                    console.log("Alarm sounded!")
+                    // SEND EMERGENCY MESSAGE
+                    // STRETCH GOAL - UNLOCK DOORS
+                }
+                if(args.newValue === 0) {
+                    console.log("Alarm cleared")
+                    // CLEAR EMERGENCY MESSAGE
+                }
+            }
+            break;
+
+        case "node on value notification":
+            // ToDo: capturing smoke alarm events seems to require responding to the
+            // value notification event. However, this code block doesn't execute. 
+            // The value updated event executes instead, but won't execute if this
+            // event is not responded to. Why? Do I really need this?
+            console.log("\'value notification\' event fired")
+            console.log(`  value notification node=${node.nodeId} CC=${args.propertyKey} newValue=${args.newValue}`);
+            // ToDo: in order to scale to more devices we can't look just for Alarm status
+            if(args.propertyKey === "Alarm status") {
+                if(args.newValue === 3) {
+                    console.log("Alarm sounded 2!")
+                    // ToDo: what action do I want to take when alarm goes off?
+                }
+                if(args.newValue === 0) {
+                    console.log("Alarm cleared 2")
+                    // ToDo: what action do I want to take when alarm clears?
+                }
+            }
+            break;
+    }
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////
+// http request processing for testing and operation of the network
+// Naming conventions follow https://restfulapi.net/resource-naming/
 ////////////////////////////////////////////////////////////////////////////////////
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 })
 
-app.get('/INCLUSION', async (req, res) => {
-    const options = {strategy: InclusionStrategy.Default};
-    const result = await driver.controller.beginInclusion(options);
-    const message = "Begin Inclusion Result: " + result
-    res.send(message);
+app.get('/network-management/devices/onboard-new-device', async (req, res) => {
+    const response = ""
+    const options = {strategy: InclusionStrategy.Default}
+    const result = await driver.controller.beginInclusion(options)
+    if(result) {
+        response = "Inclusion process started, begin device pairing process."
+    } else {
+        response = "Inclusion process failed to start."
+    }
+    res.send(response)
 })
 
 app.get('/EXCLUSION', async (req, res) => {
-    const result = await driver.controller.beginExclusion(true);
-    const message = "Begin Exclusion Result: " + result
-    res.send(message);
+    const result = await driver.controller.beginExclusion(true)
+    const response = "Begin Exclusion result: " + result
+    res.send(response)
 })
 
-app.get('/ISFAILEDNODE', async (req, res) => {
-    const id = req.query.nodeid
-    const result = await driver.controller.isFailedNode(id);
-    const message = "is node failed result " + result
-    res.send(message);
+app.get('/network-management/devices/audit-devices', async (req, res) => {
+    const response = "Device Audit Result:\n"
+    driver.controller.nodes.forEach((node) => {
+        const result = await driver.controller.isFailedNode(node.id)
+        response += "Device Node ID: " + node.id + "\n"
+        response += ", Device Class: " + node.deviceClass + "\n"
+        response += ", is failed: " + result + "\n"
+    })
+    response += "End Device Audit"
+    res.send(response)
+
+    //const id = req.query.nodeid
+
+    //console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.basic.label));
+    //console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.generic.label));
 })
 
-app.get('/REMOVEFAILEDNODE', async () => {
-    // ToDo: call driver.removeFailedNode
-})
 
