@@ -4,6 +4,13 @@ Repository for a Z-Wave project for controlling various devices around the home.
 
 A USB Zwave controller hub from [Nortek](https://www.nortekcontrol.com/products/2gig/husbzb-1-gocontrol-quickstick-combo/) is used with the Raspberry Pi.
 
+### Zwave notes and references
+
+The following links are useful for development:
+
+- [ZWaveJS Documentation](https://zwave-js.github.io/node-zwave-js/#/README)
+- [Vesternet - Understanding ZWave Networks](https://www.vesternet.com/pages/understanding-z-wave-networks-nodes-devices)
+
 ### Outdoor Christmas Lights Use Case
 
 Application allows for a user to configure 2 finite periods during a 24 hour period when a collection of Z-Wave power outlet switches will be turned on.
@@ -24,6 +31,8 @@ HTML requests are supported to perform the following actions:
 - SETSTOPTIME1 - Set the first off time of the day
 - SETSTARTTIME1 - Set the first on time of the day
 - SETSTOPTIME1 - Set the first off time of the day
+
+
 
 # Project Setup
 

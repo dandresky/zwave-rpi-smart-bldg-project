@@ -14,9 +14,43 @@ let lightSwitch;
 let timer;
 
 const app = express()
-const port = 3001
+const port = 3000
 // Adjust the serial port depending on the platform you run this app
 const driver = new Driver(serialPort)
+
+
+
+////////////////////////////////////////////////////////////////////////////////////
+// System Services/Module Dispatcher
+////////////////////////////////////////////////////////////////////////////////////
+const getCurrentTimeFormatted = () => {
+    const date = new Date()
+    const hour = date.getHours()
+    const min = date.getMinutes()
+    if(hour > 12) {
+        if(min < 10) {
+            return (hour - 12) + ":0" + min + "pm"
+        } else {
+            return (hour - 12) + ":" + min + "pm"
+        }
+    } else {
+        if(min < 10) {
+            return hour + ":0" + min + "am"
+        } else {
+            return hour + ":" + min + "am"
+        }
+    }
+}
+
+const timerIntervalFunction = () => {
+    const currentTime = getCurrentTimeFormatted()
+    console.log("time = " + currentTime)
+    // ToDo: send signal to all nodes signed up for the SYSTEM_DATE_TIME_EVENT
+    // Start by finding all json files in the app_modules folder
+    // For each json file test if it requires SYSTEM_DATE_TIME_EVENT and call its processEventSignal
+}
+
+setInterval(timerIntervalFunction, 60000)
 
 
 
@@ -126,9 +160,9 @@ driver.on("error", (e) => {
 ////////////////////////////////////////////////////////////////////////////////////
 // Start the driver. To await this method, put this line into an async method
 ////////////////////////////////////////////////////////////////////////////////////
-(async () => {
-    await driver.start();
-})();
+//(async () => {
+//    await driver.start();
+//})();
 
 for (const signal of ["SIGINT", "SIGTERM"]) {
     process.on(signal, async () => {
@@ -163,6 +197,7 @@ const processEvent = (eventName) => {
             console.log(`  value updated node=${node.nodeId} CC=${args.propertyKey} newValue=${args.newValue}`);
 
             // Wake the display and turn on lights when motion is detected
+            /*
             if(args.propertyKey === "Motion sensor status") {
                 console.log("Turning on lights...");
                 // WAKE DISPLAY
@@ -179,6 +214,7 @@ const processEvent = (eventName) => {
                     }
                 }, 60000)
             } 
+            */
 
             // Show emergency message when the alarm goes off
             if(args.propertyKey === "Alarm status") {
@@ -195,10 +231,7 @@ const processEvent = (eventName) => {
             break;
 
         case "node on value notification":
-            // ToDo: capturing smoke alarm events seems to require responding to the
-            // value notification event. However, this code block doesn't execute. 
-            // The value updated event executes instead, but won't execute if this
-            // event is not responded to. Why? Do I really need this?
+            // smoke alarm values are stateless and use the value notification event. 
             console.log("\'value notification\' event fired")
             console.log(`  value notification node=${node.nodeId} CC=${args.propertyKey} newValue=${args.newValue}`);
             // ToDo: in order to scale to more devices we can't look just for Alarm status
@@ -246,7 +279,7 @@ app.get('/EXCLUSION', async (req, res) => {
 
 app.get('/network-management/devices/audit-devices', async (req, res) => {
     const response = "Device Audit Result:\n"
-    driver.controller.nodes.forEach((node) => {
+    driver.controller.nodes.forEach(async (node) => {
         const result = await driver.controller.isFailedNode(node.id)
         response += "Device Node ID: " + node.id + "\n"
         response += ", Device Class: " + node.deviceClass + "\n"

@@ -1,0 +1,29 @@
+{
+    "general" : {
+        "appName" : " Outdoor Light Switch",
+        "appDescription" : "Control light switches for Xmas lights and other decorative applications. Based on time of day, input from an ambient light sensor, etc.",
+        "version" : "0.0.1"
+    },
+    "userAppConfigurationParameters" : [ 
+        { "name" : "Start time 1", "value" : "4:00am" },
+        { "name" : "Stop time 1", "value" : "6:00am" },
+        { "name" : "Start time 2", "value" : "4:30pm" },
+        { "name" : "Stop time 2", "value" : "10:30pm" }
+    ],
+    "requiredSystemServices" : [
+        { "value" : "SYSTEM_DATE_TIME" }
+    ],
+    "supportedSensorDevicesClasses" : [
+        { "value" : "GENERIC_TYPE_SENSOR_BINARY" }
+    ],
+    "supportedActuatorDeviceClasses" : [
+        { "value" : "GENERIC_TYPE_SWITCH_BINARY" },
+        { "value" : "GENERIC_TYPE_SWITCH_TOGGLE" }
+    ],
+    "registeredSensors" : [
+        //{ "nodeId" : "None", "deviceClass" : "None", "userName" : "None", "userDescription" : "None"}
+    ],
+    "registeredActuators" : [
+        //{ "nodeId" : "None", "deviceClass" : "None", "userName" : "None", "userDescription" : "None"}
+    ]
+}
