@@ -50,34 +50,130 @@
 
 import chalk from 'chalk'
 import fs from 'fs'
-//import { Driver } from "zwave-js"
-
-export default processEventSignal
 
 
 
-/**
- * @brief   Process an event signal from the application.
- * 
- * @details The OutdoorLightSwitch module can respond to system time events and some
- *          sensor events.
- * 
- * @param   type = SYSTEM_DATE_TIME_EVENT or SENSOR_VALUE_CHANGE_NOTIFICATION
- * @param   event = event data
- */
-const processEventSignal = (type, event) => {
-    switch(type) {
-        case "SYSTEM_DATE_TIME_EVENT":
-            break;
-        case "SENSOR_VALUE_CHANGE_NOTIFICATION":
-            break;
-        default:
-            console.log(chalk.greenBright("Module(OLS) - received unknown event signal type: " + type))
+let moduleJsonObject
+
+/*        
+const switchCCApi = node.commandClasses['Binary Switch']
+if (switchCCApi.isSupported()) {
+    console.log(`Node ${node.id} is a switch!`);
+    lightSwitch = switchCCApi
+}
+*/
+
+
+
+const outdoorLightSwitch = {
+
+    /**
+     * @brief   Initialize the module.
+     *          
+     * @details All modules must implement this function but may choose to leave blank if they
+     *          don't have any initialization to do. 
+     * 
+     * @details This module reads the config json file and prepares the json object so we only
+     *          do it once.
+     */
+    initModule: function() {
+        fs.readFile("./app_modules/OutdoorLightSwitch.json", "utf8", (err, jsonString) => {
+            if (err) {
+                console.log(chalk.greenBright("Module(OLS) - App: File read failed:", err))
+                return;
+            }
+            try {
+                moduleJsonObject = JSON.parse(jsonString)
+            } catch (err) {
+                console.log(chalk.greenBright("Module(OLS) - Error parsing JSON string:", err))
+            }
+        })
+    },
+
+    /**
+     * @brief   Process a system time event from the application. The application runs a
+     *          timer that signals once a minute with a standard (12-hour clock) time string.
+     *          
+     * @details All modules must implement this function but may choose to leave blank if they
+     *          don't care about the event. 
+     * 
+     * @details This module compares the current system time to the configured start and stop 
+     *          times in the accompanying json file.
+     * 
+     * @param   driver - reference to the driver object that may be needed by the module
+     * @param   currentTime = string representing the current system time in 12-hour format
+     */
+    processSystemTimeEvent: function(driver, currentTime) {
+        
+        console.log(chalk.greenBright("Module(OLS) - SYSTEM_TIME_EVENT received: " + currentTime))
+
+        moduleJsonObject.userAppConfigurationParameters.forEach(param => {
+            switch(param.name) {
+                case "Start time 1":
+                    if(param.value === currentTime) {
+                        console.log(chalk.greenBright("Module(OLS) - start time 1 matches current time"))
+                    }
+                    break;
+                case "Stop time 1":
+                    if(param.value === currentTime) {
+                        console.log(chalk.greenBright("Module(OLS) - stop time 1 matches current time"))
+                    }
+                    break;
+                case "Start time 2":
+                    if(param.value === currentTime) {
+                        console.log(chalk.greenBright("Module(OLS) - start time 2 matches current time"))
+                    }
+                    break;
+                case "Stop time 2":
+                    if(param.value === currentTime) {
+                        console.log(chalk.greenBright("Module(OLS) - stop time 2 matches current time"))
+                    }
+                    break;
+                default:
+                    console.log(chalk.greenBright("Module(OLS) - Found unknown user config parameter"))
+            }
+        })
+    },
+
+    /**
+     * @brief   Process a value updated event from a device we are signed up to listen to.
+     * 
+     * @details All modules must implement this function but may choose to leave blank if they
+     *          don't care about any device events. 
+     * 
+     * @details This module doesn't currently support any sensing devices. In future versions the 
+     *          OutdoorLightSwitch module will respond to sensor events such as ambient light sensor.
+     * 
+     * @param   driver - reference to the driver object that may be needed by the module
+     * @param   nodeId - node sending the value updated event
+     * @param   args - arguments associated with the value update
+     */
+     processValueUpdatedEvent: function(driver, nodeId, args) {
+        console.log(chalk.greenBright("Module(OLS) - VALUE_UPDATED event received from node: " + nodeId))
+     },
+
+     /**
+     * @brief   Process a value updated event from a device we are signed up to listen to.
+     * 
+     * @details All modules must implement this function but may choose to leave blank if they
+     *          don't care about any device events. 
+     * 
+     * @details This module doesn't currently support any alarm devices.
+     * 
+     * @param   driver - reference to the driver object that may be needed by the module
+     * @param   nodeId - node sending the value updated event
+     * @param   args - arguments associated with the value update
+     */
+    processValueNotificationEvent: function(driver, nodeId, args) {
+        console.log(chalk.greenBright("Module(OLS) - VALUE_NOTIFICATION event received from node: " + nodeId))
     }
 }
 
+export default outdoorLightSwitch
 
 
+//{ "nodeId" : "None", "deviceClass" : "None", "userName" : "None", "userDescription" : "None"}
+//{ "nodeId" : "None", "deviceClass" : "None", "userName" : "None", "userDescription" : "None"}
 
 /* Generic Device Classes defined in the specification
 GENERIC_TYPE_AV_CONTROL_POINT

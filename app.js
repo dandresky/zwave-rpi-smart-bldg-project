@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { json } from 'express'
 import minimist from 'minimist'
 import {
     Driver, 
@@ -6,17 +6,35 @@ import {
     CommandClass
 } from "zwave-js"
 
+import outdoorLightSwitch from "./app_modules/OutdoorLightSwitch.js"
+
 var argv = minimist(process.argv.slice(2));
 console.dir(argv);
+
+// Adjust the serial port depending on the platform you run this app
 const serialPort = argv.port || "/dev/ttyUSB0";
+const driver = new Driver(serialPort)
 
 let lightSwitch;
 let timer;
 
 const app = express()
 const port = 3000
-// Adjust the serial port depending on the platform you run this app
-const driver = new Driver(serialPort)
+
+import fs from 'fs'
+import path from 'path'
+import chalk from 'chalk';
+
+
+
+////////////////////////////////////////////////////////////////////////////////////
+// Module initialization
+////////////////////////////////////////////////////////////////////////////////////
+const initModules = () => {
+    outdoorLightSwitch.initModule()
+}
+
+initModules()
 
 
 
@@ -28,26 +46,62 @@ const getCurrentTimeFormatted = () => {
     const hour = date.getHours()
     const min = date.getMinutes()
     if(hour > 12) {
-        if(min < 10) {
-            return (hour - 12) + ":0" + min + "pm"
-        } else {
-            return (hour - 12) + ":" + min + "pm"
-        }
+        if(min < 10) { return (hour - 12) + ":0" + min + "pm" } 
+        else { return (hour - 12) + ":" + min + "pm" }
+    } else if(hour === 12) {
+        if(min < 10) { return "12:0" + min + "pm" } 
+        else { return "12:" + min + "pm" }
+    } if(hour === 0) {
+        if(min < 10) { return "12:0" + min + "am" } 
+        else { return "12:" + min + "am" }
     } else {
-        if(min < 10) {
-            return hour + ":0" + min + "am"
-        } else {
-            return hour + ":" + min + "am"
-        }
+        if(min < 10) { return hour + ":0" + min + "am" } 
+        else { return hour + ":" + min + "am" }
     }
 }
 
 const timerIntervalFunction = () => {
+
     const currentTime = getCurrentTimeFormatted()
-    console.log("time = " + currentTime)
-    // ToDo: send signal to all nodes signed up for the SYSTEM_DATE_TIME_EVENT
+    outdoorLightSwitch.processSystemTimeEvent(driver, currentTime)
+
+    /*
+    const startPath = "./app_modules"
+
     // Start by finding all json files in the app_modules folder
-    // For each json file test if it requires SYSTEM_DATE_TIME_EVENT and call its processEventSignal
+    if(!fs.existsSync(startPath)) {
+        console.log(`App: Path to module files (${startPath}}) not recognized`)
+    } else {
+        let files = fs.readdirSync(startPath)
+        files.forEach(file => {
+            if(path.extname(file) === ".json") {
+                // Found a module config file, check if it requires the SYSTEM_DATE_TIME service
+                fs.readFile("./app_modules/" + file, "utf8", (err, jsonString) => {
+                    if (err) {
+                      console.log("App: File read failed:", err);
+                      return;
+                    }
+                    try {
+                        const jsonObject = JSON.parse(jsonString)
+                        jsonObject.requiredSystemServices.forEach(requiredService => {
+                            if(requiredService.value === "SYSTEM_DATE_TIME") {
+                                // The module does require the SYSTEM_DATE_TIME service, send a signal to its js implementation
+                                switch(file) {
+                                    case "OutdoorLightSwitch.json":
+                                        outdoorLightSwitch.processSystemTimeEvent(currentTime)
+                                        break;
+                                    default:
+                                }
+                            }
+                        })
+                    } catch (err) {
+                        console.log("Error parsing JSON string:", err);
+                    }
+                })
+            }
+        })
+    }
+    */
 }
 
 setInterval(timerIntervalFunction, 60000)
@@ -65,14 +119,15 @@ driver.once("driver ready", () => {
     console.log("  Network (controller) Home ID: " + driver.controller.homeId.toString())
     driver.controller.nodes.forEach((node) => {
         node.once("ready", async () => { 
-            processEvent("node on ready")
-
+            console.log("\'ready\' event fired")
+            console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.basic.label));  
+            
             node.once("value updated", async (_node, args) => {
-                processEvent("node on value updated")
+                outdoorLightSwitch.processValueUpdatedEvent(driver, node.id, args)
             })
 
             node.once("value notification", async (_node, args) => {
-                processEvent("node on value notification")
+                outdoorLightSwitch.processValueNotificationEvent(driver, node.id, args)
             })
 
             node.once("asleep", () => {
@@ -181,14 +236,7 @@ const processEvent = (eventName) => {
     switch(eventName) {
         case "node on ready":
             // 
-            console.log("\'ready\' event fired")
-            console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.basic.label));  
-                    
-            const switchCCApi = node.commandClasses['Binary Switch']
-            if (switchCCApi.isSupported()) {
-                console.log(`Node ${node.id} is a switch!`);
-                lightSwitch = switchCCApi
-            }
+            
             break;
 
         case "node on value updated":
