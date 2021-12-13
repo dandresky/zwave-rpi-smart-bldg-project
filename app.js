@@ -12,30 +12,11 @@ var argv = minimist(process.argv.slice(2));
 console.dir(argv);
 
 // Adjust the serial port depending on the platform you run this app
-//const serialPort = argv.port || "/dev/ttyUSB0";         // Raspberry Pi
-const serialPort = argv.port || "/dev/ttys000"                   // Macbook
+const serialPort = argv.port || "/dev/ttyUSB0";
 const driver = new Driver(serialPort)
 
-let lightSwitch;
-let timer;
-
 const app = express()
-const port = 3000
-
-import fs from 'fs'
-import path from 'path'
-import chalk from 'chalk';
-
-
-
-////////////////////////////////////////////////////////////////////////////////////
-// Module initialization
-////////////////////////////////////////////////////////////////////////////////////
-const initModules = () => {
-    outdoorLightSwitch.initModule()
-}
-
-initModules()
+const port = 3001
 
 
 
@@ -62,47 +43,8 @@ const getCurrentTimeFormatted = () => {
 }
 
 const timerIntervalFunction = () => {
-
     const currentTime = getCurrentTimeFormatted()
     outdoorLightSwitch.processSystemTimeEvent(driver, currentTime)
-
-    /*
-    const startPath = "./app_modules"
-
-    // Start by finding all json files in the app_modules folder
-    if(!fs.existsSync(startPath)) {
-        console.log(`App: Path to module files (${startPath}}) not recognized`)
-    } else {
-        let files = fs.readdirSync(startPath)
-        files.forEach(file => {
-            if(path.extname(file) === ".json") {
-                // Found a module config file, check if it requires the SYSTEM_DATE_TIME service
-                fs.readFile("./app_modules/" + file, "utf8", (err, jsonString) => {
-                    if (err) {
-                      console.log("App: File read failed:", err);
-                      return;
-                    }
-                    try {
-                        const jsonObject = JSON.parse(jsonString)
-                        jsonObject.requiredSystemServices.forEach(requiredService => {
-                            if(requiredService.value === "SYSTEM_DATE_TIME") {
-                                // The module does require the SYSTEM_DATE_TIME service, send a signal to its js implementation
-                                switch(file) {
-                                    case "OutdoorLightSwitch.json":
-                                        outdoorLightSwitch.processSystemTimeEvent(currentTime)
-                                        break;
-                                    default:
-                                }
-                            }
-                        })
-                    } catch (err) {
-                        console.log("Error parsing JSON string:", err);
-                    }
-                })
-            }
-        })
-    }
-    */
 }
 
 setInterval(timerIntervalFunction, 60000)
@@ -113,102 +55,102 @@ setInterval(timerIntervalFunction, 60000)
 // Z-Wave Driver Events
 ////////////////////////////////////////////////////////////////////////////////////
 
+// You must add a handler for the error event before starting the driver
+driver.on("error", (e) => {
+    // Do something with it
+    console.error(e)
+});
+
 // "driver ready" event fired after controller interview is complete. We know the
 // nodes previously included, but they are still being interviewed.
 driver.once("driver ready", () => {
     console.log("\'driver ready\' event fired")
     console.log("  Network (controller) Home ID: " + driver.controller.homeId.toString())
     driver.controller.nodes.forEach((node) => {
-        node.once("ready", async () => { 
+        node.on("ready", async () => { 
             console.log("\'ready\' event fired")
             console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.basic.label));  
             
-            node.once("value updated", async (_node, args) => {
+            node.on("value updated", async (_node, args) => {
                 outdoorLightSwitch.processValueUpdatedEvent(driver, node.id, args)
             })
 
-            node.once("value notification", async (_node, args) => {
+            node.on("value notification", async (_node, args) => {
                 outdoorLightSwitch.processValueNotificationEvent(driver, node.id, args)
             })
 
-            node.once("asleep", () => {
+            node.on("asleep", () => {
                 console.log("\'asleep\' node event fired")
                 // ToDo: When is this fired? By battery powered devices cycling off? What to do?
             });
 
-            node.once("wakeup", () => {
+            node.on("wakeup", () => {
                 console.log("\'wakeup\' node event fired")
                 // ToDo: When is this fired? By battery powered devices cycling on? What to do?
             });
         });
     });
 
-    driver.controller.once("inclusion started", () => {
+    driver.controller.on("inclusion started", () => {
         console.log("\'inclusion started\' controller event fired")
         // ToDo: Do we care about this event?
     });
     
-    driver.controller.once("exclusion started", () => {
+    driver.controller.on("exclusion started", () => {
         console.log("\'exclusion started\' controller event fired")
         // ToDo: Do we care about this event?
     });
     
-    driver.controller.once("inclusion failed", () => {
+    driver.controller.on("inclusion failed", () => {
         console.log("\'inclusion failed\' controller event fired")
         // ToDo: log a detailed message for this failure. Does this function get an error parameter?
     });
     
-    driver.controller.once("exclusion failed", () => {
+    driver.controller.on("exclusion failed", () => {
         console.log("\'exclusion failed\' controller event fired")
         // ToDo: log a detailed message for this failure. Does this function get an error parameter?
     });
     
-    driver.controller.once("inclusion stopped", () => {
+    driver.controller.on("inclusion stopped", () => {
         console.log("\'inclusion stopped\' controller event fired")
         // ToDo: this is fired when a node has been successfully included. What action do we need to take?
         //       Determine if a sensor or actuator? If actuator, sign it up for sensor events?
         //       Do it here or in node added?
     });
     
-    driver.controller.once("exclusion stopped", () => {
+    driver.controller.on("exclusion stopped", () => {
         console.log("\'exclusion stopped\' controller event fired")
         // ToDo: this is fired when a node has been successfully excluded. If it was a sensor, then
         // make sure there aren't any actuators listening for events.
         // Do it here or in node removed?
     });
 
-    driver.controller.once("node added", () => {
+    driver.controller.on("node added", () => {
         console.log("\'node added\' controller event fired")
         // ToDo: this is fired when a node has been added. Should we respond to this or
         // inclusion stopped?
     });
 
-    driver.controller.once("node removed", () => {
+    driver.controller.on("node removed", () => {
         console.log("\'node removed\' controller event fired")
         // ToDo: this is fired when a node has been removed. Should we respond to this or
         // exclusion stopped?
     });
 
-    driver.controller.once("heal network progress", () => {
+    driver.controller.on("heal network progress", () => {
         console.log("\'heal network progress\' controller event fired")
         // ToDo: this is fired when we request a status? This is future.
     });
 
-    driver.controller.once("heal network done", () => {
+    driver.controller.on("heal network done", () => {
         console.log("\'heal network done\' controller event fired")
         // ToDo: This is future
     });
 
-    driver.controller.once("statistics updated", () => {
+    driver.controller.on("statistics updated", () => {
         console.log("\'statistics updated\' controller event fired")
         // ToDo: implement some detailed logs to show us the stats
     });
-});
-
-// You must add a handler for the error event before starting the driver
-driver.on("error", (e) => {
-    // Do something with it
-    console.error(e)
 });
 
 
@@ -299,6 +241,17 @@ const processEvent = (eventName) => {
 
 
 ////////////////////////////////////////////////////////////////////////////////////
+// Module initialization
+////////////////////////////////////////////////////////////////////////////////////
+const initModules = () => {
+    outdoorLightSwitch.initModule()
+}
+
+initModules()
+
+
+
+////////////////////////////////////////////////////////////////////////////////////
 // http request processing for testing and operation of the network
 // Naming conventions follow https://restfulapi.net/resource-naming/
 ////////////////////////////////////////////////////////////////////////////////////
@@ -324,13 +277,33 @@ app.get('/EXCLUSION', async (req, res) => {
     res.send(response)
 })
 
-app.get('/network-management/devices/audit-devices', async (req, res) => {
-    const response = "Device Audit Result:\n"
+app.get('/network-management/devices/audit-devices', (req, res) => {
+    let response = "Device Audit Result:\n"
     driver.controller.nodes.forEach(async (node) => {
-        const result = await driver.controller.isFailedNode(node.id)
         response += "Device Node ID: " + node.id + "\n"
-        response += ", Device Class: " + node.deviceClass + "\n"
-        response += ", is failed: " + result + "\n"
+        response += "- Name: " + node.name + "\n"
+        response += "- Location: " + node.location + "\n"
+        response += "- Basic Class: " + node.deviceClass.basic.label + "\n"
+        response += "- Generic Class: " + node.deviceClass.generic.label + "\n"
+        const status = node.status
+        switch(status) {
+            case 0: 
+                response += "- Status: Unknown\n" 
+                break;
+            case 1:
+                response += "- Status: Asleep\n" 
+                break;
+            case 2:
+                response += "- Status: Awake\n" 
+                break;
+            case 3:
+                response += "- Status: Dead\n" 
+                break;
+            case 4:
+                response += "- Status: Alive\n" 
+                break;
+            default:
+        }
     })
     response += "End Device Audit"
     res.send(response)

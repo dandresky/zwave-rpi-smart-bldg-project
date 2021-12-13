@@ -1,7 +1,7 @@
 {
-  "name": "hackathon-2021-zwave",
+  "name": "my-home-zwave-network",
   "version": "1.0.0",
-  "description": "POC for a Mersive room automation idea",
+  "description": "Application for runnng Zwave devices around the home",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
