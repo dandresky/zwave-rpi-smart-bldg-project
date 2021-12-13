@@ -259,24 +259,6 @@ app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 })
 
-app.get('/network-management/devices/onboard-new-device', async (req, res) => {
-    const response = ""
-    const options = {strategy: InclusionStrategy.Default}
-    const result = await driver.controller.beginInclusion(options)
-    if(result) {
-        response = "Inclusion process started, begin device pairing process."
-    } else {
-        response = "Inclusion process failed to start."
-    }
-    res.send(response)
-})
-
-app.get('/EXCLUSION', async (req, res) => {
-    const result = await driver.controller.beginExclusion(true)
-    const response = "Begin Exclusion result: " + result
-    res.send(response)
-})
-
 app.get('/network-management/devices/audit-devices', (req, res) => {
     let response = "Device Audit Result:\n"
     driver.controller.nodes.forEach(async (node) => {
@@ -313,5 +295,39 @@ app.get('/network-management/devices/audit-devices', (req, res) => {
     //console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.basic.label));
     //console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.generic.label));
 })
+
+app.get('/network-management/devices/onboard-new-device', async (req, res) => {
+    const response = ""
+    const options = {strategy: InclusionStrategy.Default}
+    const result = await driver.controller.beginInclusion(options)
+    if(result) {
+        response = "Inclusion process started, begin device pairing process."
+    } else {
+        response = "Inclusion process failed to start."
+    }
+    res.send(response)
+})
+
+app.get('/network-management/devices/remove-device', async (req, res) => {
+    driver.controller.isFailedNode(req.query.nodeId).then(function(result) {
+        return result
+    })
+    .then(function(result) {
+        if(result) {
+            res.send("Removing device " + req.query.nodeId)
+        } else {
+            res.send("Not a failed node (" + req.query.nodeId + ")")
+        }
+    })
+    
+})
+
+app.get('/EXCLUSION', async (req, res) => {
+    const result = await driver.controller.beginExclusion(true)
+    const response = "Begin Exclusion result: " + result
+    res.send(response)
+})
+
+
 
 
