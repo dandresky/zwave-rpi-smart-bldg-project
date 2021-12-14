@@ -12,7 +12,8 @@ var argv = minimist(process.argv.slice(2));
 console.dir(argv);
 
 // Adjust the serial port depending on the platform you run this app
-const serialPort = argv.port || "/dev/ttyUSB0";
+//const serialPort = argv.port || "/dev/ttyUSB0";         // Raspberry Pi
+const serialPort = argv.port || "/dev/ttys000"                   // Macbook
 const driver = new Driver(serialPort)
 
 let lightSwitch;
@@ -215,9 +216,9 @@ driver.on("error", (e) => {
 ////////////////////////////////////////////////////////////////////////////////////
 // Start the driver. To await this method, put this line into an async method
 ////////////////////////////////////////////////////////////////////////////////////
-//(async () => {
-//    await driver.start();
-//})();
+(async () => {
+    await driver.start();
+})();
 
 for (const signal of ["SIGINT", "SIGTERM"]) {
     process.on(signal, async () => {
@@ -234,10 +235,6 @@ for (const signal of ["SIGINT", "SIGTERM"]) {
 ////////////////////////////////////////////////////////////////////////////////////
 const processEvent = (eventName) => {
     switch(eventName) {
-        case "node on ready":
-            // 
-            
-            break;
 
         case "node on value updated":
             // A node has updated its value. See which one and act on it.
@@ -262,7 +259,6 @@ const processEvent = (eventName) => {
                     }
                 }, 60000)
             } 
-            */
 
             // Show emergency message when the alarm goes off
             if(args.propertyKey === "Alarm status") {
@@ -276,6 +272,7 @@ const processEvent = (eventName) => {
                     // CLEAR EMERGENCY MESSAGE
                 }
             }
+            */
             break;
 
         case "node on value notification":
@@ -283,6 +280,7 @@ const processEvent = (eventName) => {
             console.log("\'value notification\' event fired")
             console.log(`  value notification node=${node.nodeId} CC=${args.propertyKey} newValue=${args.newValue}`);
             // ToDo: in order to scale to more devices we can't look just for Alarm status
+            /*
             if(args.propertyKey === "Alarm status") {
                 if(args.newValue === 3) {
                     console.log("Alarm sounded 2!")
@@ -293,6 +291,7 @@ const processEvent = (eventName) => {
                     // ToDo: what action do I want to take when alarm clears?
                 }
             }
+            */
             break;
     }
 }
