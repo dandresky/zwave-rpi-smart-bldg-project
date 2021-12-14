@@ -255,20 +255,20 @@ initModules()
 // Support functions
 ////////////////////////////////////////////////////////////////////////////////////
 const removeFailedNode = (nodeId) => {
-    try {
-        driver.controller.removeFailedNode(nodeId).then(function(result) {
-            return result
-        })
-        .then(function(result) {
-            if(result) {
-                res.send("Removed device " + nodeId)
-            } else {
-                res.send("Node ID " + nodeId + " is not a failed node")
-            }
-        })
-    } catch(e) {
-        res.send("Error removing node " + nodeId + ": " + e)
-    }
+    driver.controller.removeFailedNode(nodeId)
+    .then(function(result) {
+        return result
+    })
+    .then(function(result) {
+        if(result) {
+            console.log("Removed device " + nodeId)
+        } else {
+            console.log("Node ID " + nodeId + " is not a failed node")
+        }
+    })
+    .catch(function(err) {
+        console.log("Error removing node " + nodeId + ": " + err)
+    })
 }
 
 
@@ -319,56 +319,51 @@ app.get('/network-management/devices/audit-devices', (req, res) => {
 })
 
 app.get('/network-management/devices/onboard-new-device', async (req, res) => {
-    const response = ""
-    const options = {strategy: InclusionStrategy.Default}
-    const result = await driver.controller.beginInclusion(options)
-    if(result) {
-        response = "Inclusion process started, begin device pairing process."
-    } else {
-        response = "Inclusion process failed to start."
-    }
-    res.send(response)
+    driver.controller.beginInclusion({strategy: InclusionStrategy.Default})
+    .then(function(result) {
+        if(result) {
+            res.send("Inclusion process started, begin device pairing process.")
+        } else {
+            res.send("Inclusion process failed to start.")
+        }
+    })
+    .catch(function(err) {
+        res.send("Error starting node inclusion process: \n" + err)
+    })
 })
 
 app.get('/network-management/devices/remove-device', async (req, res) => {
-    try {
-        driver.controller.beginExclusion(driver.controller.supportsFeature(SmartStart))
-        .then(function(result) {
-            if(result) {
-                res.send("Exclusion process started. Follow your device specific instructions for removing from a network." + e)
-            } else {
-                res.send("Exclusion process did not start. It may already be running. Wait 30s and try again." + e)
-            }
-        })
-    } catch(e) {
-        res.send("Error starting node exclusion process: \n" + e)
-    }
+    driver.controller.beginExclusion(driver.controller.supportsFeature(SmartStart))
+    .then(function(result) {
+        if(result) {
+            res.send("Exclusion process started. Follow your device specific instructions for removing from a network." + e)
+        } else {
+            res.send("Exclusion process did not start. It may already be running. Wait 30s and try again." + e)
+        }
+    })
+    .catch(function(err) {
+        res.send("Error starting node exclusion process: \n" + err)
+    })
 })
 
 app.get('/network-management/devices/remove-failed-device', async (req, res) => {
-    try {
-        const nodeId = req.query.nodeId
-        driver.controller.isFailedNode(nodeId).then(function(result) {
-            return result
-        })
-        .then(function(result) {
-            if(result) {
-                // Remove the failed node
-                res.send("Removing device " + nodeId)
-                removeFailedNode(nodeId)
-            } else {
-                res.send("Node ID " + nodeId + " is not a failed node")
-            }
-        })
-    } catch(e) {
-        res.send("Error confirming if node is failed: \n" + e)
-    }
-})
-
-app.get('/EXCLUSION', async (req, res) => {
-    const result = await driver.controller.beginExclusion(true)
-    const response = "Begin Exclusion result: " + result
-    res.send(response)
+    const nodeId = req.query.nodeId
+    driver.controller.isFailedNode(nodeId)
+    .then(function(result) {
+        return result
+    })
+    .then(function(result) {
+        if(result) {
+            // Remove the failed node
+            res.send("Removing device " + nodeId)
+            removeFailedNode(nodeId)
+        } else {
+            res.send("Node ID " + nodeId + " is not a failed node")
+        }
+    })
+    .catch(function(err) {
+        res.send("Error confirming if node is failed: \n" + err)
+    })
 })
 
 
