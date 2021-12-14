@@ -336,9 +336,9 @@ app.get('/network-management/devices/remove-device', async (req, res) => {
     driver.controller.beginExclusion(driver.controller.supportsFeature(SmartStart))
     .then(function(result) {
         if(result) {
-            res.send("Exclusion process started. Follow your device specific instructions for removing from a network." + e)
+            res.send("Exclusion process started. Follow your device specific instructions for removing from a network.")
         } else {
-            res.send("Exclusion process did not start. It may already be running. Wait 30s and try again." + e)
+            res.send("Exclusion process did not start. It may already be running. Wait 30s and try again.")
         }
     })
     .catch(function(err) {
