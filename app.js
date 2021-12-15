@@ -252,6 +252,28 @@ initModules()
 
 
 ////////////////////////////////////////////////////////////////////////////////////
+// Support functions
+////////////////////////////////////////////////////////////////////////////////////
+const removeFailedNode = (nodeId) => {
+    try {
+        driver.controller.removeFailedNode(nodeId).then(function(result) {
+            return result
+        })
+        .then(function(result) {
+            if(result) {
+                res.send("Removed device " + nodeId)
+            } else {
+                res.send("Node ID " + nodeId + " is not a failed node")
+            }
+        })
+    } catch(e) {
+        res.send("Error removing node " + nodeId + ": " + e)
+    }
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////
 // http request processing for testing and operation of the network
 // Naming conventions follow https://restfulapi.net/resource-naming/
 ////////////////////////////////////////////////////////////////////////////////////
@@ -309,17 +331,38 @@ app.get('/network-management/devices/onboard-new-device', async (req, res) => {
 })
 
 app.get('/network-management/devices/remove-device', async (req, res) => {
-    driver.controller.isFailedNode(req.query.nodeId).then(function(result) {
-        return result
-    })
-    .then(function(result) {
-        if(result) {
-            res.send("Removing device " + req.query.nodeId)
-        } else {
-            res.send("Not a failed node (" + req.query.nodeId + ")")
-        }
-    })
-    
+    try {
+        driver.controller.beginExclusion(driver.controller.supportsFeature(SmartStart))
+        .then(function(result) {
+            if(result) {
+                res.send("Exclusion process started. Follow your device specific instructions for removing from a network." + e)
+            } else {
+                res.send("Exclusion process did not start. It may already be running. Wait 30s and try again." + e)
+            }
+        })
+    } catch(e) {
+        res.send("Error starting node exclusion process: \n" + e)
+    }
+})
+
+app.get('/network-management/devices/remove-failed-device', async (req, res) => {
+    try {
+        const nodeId = req.query.nodeId
+        driver.controller.isFailedNode(nodeId).then(function(result) {
+            return result
+        })
+        .then(function(result) {
+            if(result) {
+                // Remove the failed node
+                res.send("Removing device " + nodeId)
+                removeFailedNode(nodeId)
+            } else {
+                res.send("Node ID " + nodeId + " is not a failed node")
+            }
+        })
+    } catch(e) {
+        res.send("Error confirming if node is failed: \n" + e)
+    }
 })
 
 app.get('/EXCLUSION', async (req, res) => {
