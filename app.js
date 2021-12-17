@@ -255,16 +255,9 @@ initModules()
 // Support functions
 ////////////////////////////////////////////////////////////////////////////////////
 const removeFailedNode = (nodeId) => {
-    driver.controller.removeFailedNode(nodeId)
-    .then(function(result) {
-        return result
-    })
-    .then(function(result) {
-        if(result) {
-            console.log("Removed device " + nodeId)
-        } else {
-            console.log("Node ID " + nodeId + " is not a failed node")
-        }
+    driver.controller.removeFailedNode(parseInt(nodeId))
+    .then(function() {
+        console.log("Removed device " + nodeId)
     })
     .catch(function(err) {
         console.log("Error removing node " + nodeId + ": " + err)
@@ -355,7 +348,7 @@ app.get('/network-management/devices/remove-failed-device', async (req, res) => 
     .then(function(result) {
         if(result) {
             // Remove the failed node
-            res.send("Removing device " + nodeId)
+            res.send("Removing device " + nodeId + ", isFailedNode result: " + result)
             removeFailedNode(nodeId)
         } else {
             res.send("Node ID " + nodeId + " is not a failed node")
