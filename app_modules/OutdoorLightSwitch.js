@@ -91,6 +91,40 @@ const outdoorLightSwitch = {
     },
 
     /**
+     * @brief   Process the device added event from the application.
+     * 
+     * @details All modules must implement this function but may choose to leave blank if they
+     *          don't care about the event. 
+     *          
+     * @details The application provides a node object and additional information about the
+     *          inclusion result. This function inspects the nodes properties and saves to the
+     *          local json file if the device is of interest. 
+     * 
+     * @param   node - device node object
+     * @param   result - Additional information about the inclusion result
+     */
+    processDeviceAddedEvent: function(node, result) {
+        console.log(chalk.greenBright(`Module(OLS) - Device ${node.id} Added to the network with result: ${result}`))
+    },
+
+    /**
+     * @brief   Process the device removed event from the application.
+     * 
+     * @details All modules must implement this function but may choose to leave blank if they
+     *          don't care about the event. 
+     *          
+     * @details The application provides a node object and a result  about the
+     *          inclusion result. This function inspects the nodes properties and saves to the
+     *          local json file if the device is of interest. 
+     * 
+     * @param   node - device node object
+     * @param   result - Additional information about the inclusion result
+     */
+    processDeviceRemovedEvent: function(node, replaced) {
+        console.log(chalk.greenBright(`Module(OLS) - Device ${node.id} Removed from the network, was replaced = ${replaced}`))
+    },
+
+    /**
      * @brief   Process a system time event from the application. The application runs a
      *          timer that signals once a minute with a standard (12-hour clock) time string.
      *          

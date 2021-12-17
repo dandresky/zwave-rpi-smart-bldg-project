@@ -71,12 +71,14 @@ driver.once("driver ready", () => {
             console.log("\'ready\' event fired")
             console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.basic.label));  
             
-            node.on("value updated", async (_node, args) => {
-                outdoorLightSwitch.processValueUpdatedEvent(driver, node.id, args)
+            node.on("value updated", async (node, args) => {
+                console.log("\'value updated\' node event fired with args: " + args)
+                outdoorLightSwitch.processValueUpdatedEvent(driver, node, args)
             })
 
-            node.on("value notification", async (_node, args) => {
-                outdoorLightSwitch.processValueNotificationEvent(driver, node.id, args)
+            node.on("value notification", async (node, args) => {
+                console.log("\'value notification\' node event fired with args: " + args)
+                outdoorLightSwitch.processValueNotificationEvent(driver, node, args)
             })
 
             node.on("asleep", () => {
@@ -125,16 +127,13 @@ driver.once("driver ready", () => {
         // Do it here or in node removed?
     });
 
-    driver.controller.on("node added", () => {
-        console.log("\'node added\' controller event fired")
-        // ToDo: this is fired when a node has been added. Should we respond to this or
-        // inclusion stopped?
+    driver.controller.on("node added", (node, result) => {
+        console.log("ADDING ^^^^^^^ ADDING %%%%%%%%%%%%% ADDING @@@@@@@@@@@@@@@ ADDING !!!!!!!!!!!!!!!!!!!!!!!!")
+        outdoorLightSwitch.processDeviceAddedEvent(node, result)
     });
 
-    driver.controller.on("node removed", () => {
-        console.log("\'node removed\' controller event fired")
-        // ToDo: this is fired when a node has been removed. Should we respond to this or
-        // exclusion stopped?
+    driver.controller.on("node removed", (node, replaced) => {
+        outdoorLightSwitch.processDeviceRemovedEvent(node, replaced)
     });
 
     driver.controller.on("heal network progress", () => {
@@ -317,7 +316,7 @@ app.get('/network-management/devices/onboard-new-device', async (req, res) => {
         if(result) {
             res.send("Inclusion process started, begin device pairing process.")
         } else {
-            res.send("Inclusion process failed to start.")
+            res.send("Inclusion process failed or was already started.")
         }
     })
     .catch(function(err) {
@@ -326,7 +325,7 @@ app.get('/network-management/devices/onboard-new-device', async (req, res) => {
 })
 
 app.get('/network-management/devices/remove-device', async (req, res) => {
-    driver.controller.beginExclusion(driver.controller.supportsFeature(SmartStart))
+    driver.controller.beginExclusion()
     .then(function(result) {
         if(result) {
             res.send("Exclusion process started. Follow your device specific instructions for removing from a network.")

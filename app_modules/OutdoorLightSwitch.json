@@ -10,10 +10,7 @@
         { "name" : "Start time 2", "value" : "12:13am" },
         { "name" : "Stop time 2", "value" : "12:15am" }
     ],
-    "requiredSystemServices" : [
-        { "value" : "SYSTEM_DATE_TIME" }
-    ],
-    "supportedSensorDevicesClasses" : [
+    "supportedSensorDeviceClasses" : [
         { "value" : "GENERIC_TYPE_SENSOR_BINARY" }
     ],
     "supportedActuatorDeviceClasses" : [
