@@ -29,6 +29,7 @@ import fs from 'fs'
 
 
 let moduleJsonObject
+let state
 
 
 
@@ -50,9 +51,7 @@ const outdoorLightSwitch = {
         moduleJsonObject.registeredActuators.forEach(registeredActuator => {
 
             let lightSwitch
-            console.log(chalk.greenBright("Module(OLS) - setLightSwitch node id = ", registeredActuator.nodeId))
             const node = driver.controller.nodes.get(parseInt(registeredActuator.nodeId))
-            console.log(chalk.greenBright("Module(OLS) - referenced node id = ", node.id))
             const switchCCApi = node.commandClasses['Binary Switch']
 
             switch(mode) {
@@ -109,6 +108,9 @@ const outdoorLightSwitch = {
             }
             try {
                 moduleJsonObject = JSON.parse(jsonString)
+                state = moduleJsonObject.userAppConfigurationParameters.find(element => 
+                    element.name === "Normal State").value
+                console.log(chalk.greenBright("State = " + state))
             } catch (err) {
                 console.log(chalk.greenBright("Module(OLS) - Error parsing JSON string:", err))
             }
@@ -167,27 +169,34 @@ const outdoorLightSwitch = {
                 case "Start time 1":
                     if((param.value === currentTime) && (param.value !== "00:00")) {
                         console.log(chalk.greenBright("Module(OLS) - start time 1 matches current time"))
+                        state = "on"
                         this.setLightSwitches(driver, "on")
                     }
                     break;
                 case "Stop time 1":
                     if((param.value === currentTime) && (param.value !== "00:00")) {
                         console.log(chalk.greenBright("Module(OLS) - stop time 1 matches current time"))
+                        state = "off"
                         this.setLightSwitches(driver, "off")
                     }
                     break;
                 case "Start time 2":
                     if((param.value === currentTime) && (param.value !== "00:00")) {
                         console.log(chalk.greenBright("Module(OLS) - start time 2 matches current time"))
+                        state = "on"
                         this.setLightSwitches(driver, "on")
                     }
                     break;
                 case "Stop time 2":
                     if((param.value === currentTime) && (param.value !== "00:00")) {
                         console.log(chalk.greenBright("Module(OLS) - stop time 2 matches current time"))
+                        state = "off"
                         this.setLightSwitches(driver, "off")
                     }
                     break;
+                case "Normal State":
+                    // ToDo: periodically check that the device is in the correct state
+                    break
                 default:
                     console.log(chalk.greenBright("Module(OLS) - Found unknown user config parameter"))
             }

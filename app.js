@@ -273,6 +273,22 @@ app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
 })
 
+/**
+ * @brief   Apply module config changes. The module config json file has been changed
+ *          outside of this application (manually or through web config) and the module
+ *          needs to be notified so it can update the copy it uses in memory.
+ */
+ app.get('/network-management/admin/apply-module-config-changes', async (req, res) => {
+    switch(req.query.module) {
+        case "OutdoorLightSwitch":
+            outdoorLightSwitch.applyModuleConfigChanges()
+            res.send(`Changes for module config ${req.query.module}.json have been applied`)
+            break
+        default:
+            res.send("apply-module-config-changes received unknown module name - check that spelling matches json file")
+    }
+})
+
 app.get('/network-management/devices/audit-devices', (req, res) => {
     let response = "Device Audit Result:\n"
     driver.controller.nodes.forEach(async (node) => {
@@ -305,7 +321,7 @@ app.get('/network-management/devices/audit-devices', (req, res) => {
     res.send(response)
 })
 
-app.get('/network-management/devices/onboard-new-device', async (req, res) => {
+app.get('/network-management/devices/start-inclusion', async (req, res) => {
     driver.controller.beginInclusion({strategy: InclusionStrategy.Default})
     .then(function(result) {
         if(result) {
@@ -319,7 +335,7 @@ app.get('/network-management/devices/onboard-new-device', async (req, res) => {
     })
 })
 
-app.get('/network-management/devices/remove-device', async (req, res) => {
+app.get('/network-management/devices/start-exclusion', async (req, res) => {
     driver.controller.beginExclusion()
     .then(function(result) {
         if(result) {
@@ -353,26 +369,40 @@ app.get('/network-management/devices/remove-failed-device', async (req, res) => 
     })
 })
 
+app.get('/network-management/devices/stop-inclusion', async (req, res) => {
+    driver.controller.stopInclusion()
+    .then(function(result) {
+        if(result) {
+            res.send("Inclusion process stopped")
+        } else {
+            res.send("Inclusion process failed to stop or was already stopped")
+        }
+    })
+    .catch(function(err) {
+        res.send("Error stopping the on-boarding process: \n" + err)
+    })
+})
+
+app.get('/network-management/devices/stop-exclusion', async (req, res) => {
+    driver.controller.stopInclusion()
+    .then(function(result) {
+        if(result) {
+            res.send("Exclusion process stopped")
+        } else {
+            res.send("Exclusion process failed to stop or was already stopped")
+        }
+    })
+    .catch(function(err) {
+        res.send("Error stopping the exclusion process: \n" + err)
+    })
+})
+
 app.get('/network-management/tests/set-light-switch', async (req, res) => {
     outdoorLightSwitch.setLightSwitches(driver, req.query.newState)
     res.send("setLightSwitch has been called - did you see the expected change?")
 })
 
-/**
- * @brief   Apply module config changes. The module config json file has been changed
- *          outside of this application (manually or through web config) and the module
- *          needs to be notified so it can update the copy it uses in memory.
- */
-app.get('/network-management/admin/apply-module-config-changes', async (req, res) => {
-    switch(req.query.module) {
-        case "OutdoorLightSwitch":
-            outdoorLightSwitch.applyModuleConfigChanges()
-            res.send(`Changes for module config ${req.query.module}.json have been applied`)
-            break
-        default:
-            res.send("apply-module-config-changes received unknown module name - check that spelling matches json file")
-    }
-})
+
 
 
 
