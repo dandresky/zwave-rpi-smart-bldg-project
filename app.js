@@ -128,7 +128,6 @@ driver.once("driver ready", () => {
     });
 
     driver.controller.on("node added", (node, result) => {
-        console.log("ADDING ^^^^^^^ ADDING %%%%%%%%%%%%% ADDING @@@@@@@@@@@@@@@ ADDING !!!!!!!!!!!!!!!!!!!!!!!!")
         outdoorLightSwitch.processDeviceAddedEvent(node, result)
     });
 
@@ -243,6 +242,7 @@ const processEvent = (eventName) => {
 // Module initialization
 ////////////////////////////////////////////////////////////////////////////////////
 const initModules = () => {
+    // Add all module inits here
     outdoorLightSwitch.initModule()
 }
 
@@ -303,11 +303,6 @@ app.get('/network-management/devices/audit-devices', (req, res) => {
     })
     response += "End Device Audit"
     res.send(response)
-
-    //const id = req.query.nodeid
-
-    //console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.basic.label));
-    //console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.generic.label));
 })
 
 app.get('/network-management/devices/onboard-new-device', async (req, res) => {
@@ -356,6 +351,27 @@ app.get('/network-management/devices/remove-failed-device', async (req, res) => 
     .catch(function(err) {
         res.send("Error confirming if node is failed: \n" + err)
     })
+})
+
+app.get('/network-management/tests/set-light-switch', async (req, res) => {
+    outdoorLightSwitch.setLightSwitches(driver, req.query.newState)
+    res.send("setLightSwitch has been called - did you see the expected change?")
+})
+
+/**
+ * @brief   Apply module config changes. The module config json file has been changed
+ *          outside of this application (manually or through web config) and the module
+ *          needs to be notified so it can update the copy it uses in memory.
+ */
+app.get('/network-management/admin/apply-module-config-changes', async (req, res) => {
+    switch(req.query.module) {
+        case "OutdoorLightSwitch":
+            outdoorLightSwitch.applyModuleConfigChanges()
+            res.send(`Changes for module config ${req.query.module}.json have been applied`)
+            break
+        default:
+            res.send("apply-module-config-changes received unknown module name - check that spelling matches json file")
+    }
 })
 
 

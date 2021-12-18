@@ -5,10 +5,10 @@
         "version" : "0.0.1"
     },
     "userAppConfigurationParameters" : [ 
-        { "name" : "Start time 1", "value" : "12:09am" },
-        { "name" : "Stop time 1", "value" : "12:11am" },
-        { "name" : "Start time 2", "value" : "12:13am" },
-        { "name" : "Stop time 2", "value" : "12:15am" }
+        { "name" : "Start time 1", "value" : "4:55pm" },
+        { "name" : "Stop time 1", "value" : "4:58pm" },
+        { "name" : "Start time 2", "value" : "5:02pm" },
+        { "name" : "Stop time 2", "value" : "5:45pm" }
     ],
     "supportedSensorDeviceClasses" : [
         { "value" : "GENERIC_TYPE_SENSOR_BINARY" }
@@ -18,9 +18,28 @@
         { "value" : "GENERIC_TYPE_SWITCH_TOGGLE" }
     ],
     "registeredSensors" : [
-        
+        { 
+            "nodeId":"11", 
+            "name":"undefined", 
+            "location":"undefined", 
+            "genericClass":"Notification Sensor", 
+            "specificClass":"Notification Sensor" 
+        }
     ],
     "registeredActuators" : [
-        
+        {
+            "nodeId":"9", 
+            "name":"undefined", 
+            "location":"undefined", 
+            "genericClass":"Binary Switch", 
+            "specificClass":"Binary Power Switch" 
+        },
+        { 
+            "nodeId":"10", 
+            "name":"undefined", 
+            "location":"undefined", 
+            "genericClass":"Binary Switch", 
+            "specificClass":"Binary Power Switch" 
+        }
     ]
 }
