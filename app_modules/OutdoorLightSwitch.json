@@ -5,10 +5,10 @@
         "version" : "0.0.1"
     },
     "userAppConfigurationParameters" : [ 
-        { "name" : "Start time 1", "value" : "7:40pm" },
-        { "name" : "Stop time 1", "value" : "7:43pm" },
-        { "name" : "Start time 2", "value" : "7:45pm" },
-        { "name" : "Stop time 2", "value" : "7:50pm" },
+        { "name" : "Start time 1", "value" : "4:40pm" },
+        { "name" : "Stop time 1", "value" : "10:15pm" },
+        { "name" : "Start time 2", "value" : "5:30am" },
+        { "name" : "Stop time 2", "value" : "6:30am" },
         { "name" : "Normal State", "value" : "off"}
     ],
     "supportedSensorDeviceClasses" : [

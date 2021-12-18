@@ -57,7 +57,7 @@ const outdoorLightSwitch = {
             switch(mode) {
                 case "on":
                     console.log(chalk.greenBright("Module(OLS) - turning switch on"))
-                    if (switchCCApi.isSupported()) {
+                    if ((switchCCApi.isSupported()) && (node.status !== 3)) {
                         console.log(`Node ${node.id} is a switch!`);
                         lightSwitch = switchCCApi
                         lightSwitch.set(true)
@@ -65,7 +65,7 @@ const outdoorLightSwitch = {
                     break;
                 case "off":
                     console.log(chalk.greenBright("Module(OLS) - turning switch off"))
-                    if (switchCCApi.isSupported()) {
+                    if ((switchCCApi.isSupported()) && (node.status !== 3)) {
                         console.log(`Node ${node.id} is a switch!`);
                         lightSwitch = switchCCApi
                         lightSwitch.set(false)
