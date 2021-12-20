@@ -1,4 +1,4 @@
-import express, { json } from 'express'
+import express from 'express'
 import minimist from 'minimist'
 import {
     Driver, 
@@ -115,16 +115,10 @@ driver.once("driver ready", () => {
     
     driver.controller.on("inclusion stopped", () => {
         console.log("\'inclusion stopped\' controller event fired")
-        // ToDo: this is fired when a node has been successfully included. What action do we need to take?
-        //       Determine if a sensor or actuator? If actuator, sign it up for sensor events?
-        //       Do it here or in node added?
     });
     
     driver.controller.on("exclusion stopped", () => {
         console.log("\'exclusion stopped\' controller event fired")
-        // ToDo: this is fired when a node has been successfully excluded. If it was a sensor, then
-        // make sure there aren't any actuators listening for events.
-        // Do it here or in node removed?
     });
 
     driver.controller.on("node added", (node, result) => {

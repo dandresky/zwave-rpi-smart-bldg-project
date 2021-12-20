@@ -143,7 +143,7 @@ const outdoorLightSwitch = {
      * @param   node - device node object
      * @param   result - Additional information about the inclusion result
      */
-    processDeviceRemovedEvent: function(node, replaced) {
+    processDeviceRemovedEvent: function(nodeId, replaced) {
         //console.log(chalk.greenBright(`Module(OLS) - Device ${node.id} Removed from the network, was replaced = ${replaced}`))
     },
 
