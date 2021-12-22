@@ -22,14 +22,14 @@
     ],
     "registeredActuators" : [
         {
-            "nodeId":"9", 
+            "nodeId":"2", 
             "name":"undefined", 
             "location":"undefined", 
             "genericClass":"Binary Switch", 
             "specificClass":"Binary Power Switch" 
         },
-        { 
-            "nodeId":"10", 
+        {
+            "nodeId":"3", 
             "name":"undefined", 
             "location":"undefined", 
             "genericClass":"Binary Switch", 

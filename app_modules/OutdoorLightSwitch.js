@@ -52,7 +52,14 @@ const outdoorLightSwitch = {
 
             let lightSwitch
             const node = driver.controller.nodes.get(parseInt(registeredActuator.nodeId))
-            const switchCCApi = node.commandClasses['Binary Switch']
+            let switchCCApi 
+            if((node !== undefined) && (node.status !== 3)) {
+                switchCCApi = node.commandClasses['Binary Switch']
+            }
+            else {
+                console.log("Error setting light switch, one or more nodes are undefined and probably dead. Try removing.")
+                return
+            }
 
             switch(mode) {
                 case "on":
