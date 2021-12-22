@@ -19,13 +19,6 @@
         { "value" : "GENERIC_TYPE_SWITCH_TOGGLE" }
     ],
     "registeredSensors" : [
-        { 
-            "nodeId":"11", 
-            "name":"undefined", 
-            "location":"undefined", 
-            "genericClass":"Notification Sensor", 
-            "specificClass":"Notification Sensor" 
-        }
     ],
     "registeredActuators" : [
         {
