@@ -4,6 +4,10 @@ This repository contains all of the source code and documentation for a home/bui
 
 This project consists of a Nodejs application running on any flavor of Linux targetted for the RPi. For my development I used the default Raspbian OS based on Debian Buster.
 
+### License
+
+<ToDo: Add some license info here>
+
 Application summary:
 
 - A Nodejs server application with a Restful API that is exposed on port 3001.
