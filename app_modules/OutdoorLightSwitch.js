@@ -68,6 +68,9 @@ const outdoorLightSwitch = {
                         console.log(`Node ${node.id} is a switch!`);
                         lightSwitch = switchCCApi
                         lightSwitch.set(true)
+                        .catch(function() {
+                            console.log(chalk.greenBright(`Module(OLS): failed to turn on switch (node ID ${node.id})`))
+                        })
                     }
                     break;
                 case "off":
@@ -76,6 +79,9 @@ const outdoorLightSwitch = {
                         console.log(`Node ${node.id} is a switch!`);
                         lightSwitch = switchCCApi
                         lightSwitch.set(false)
+                        .catch(function() {
+                            console.log(chalk.greenBright(`Module(OLS): failed to turn off switch (node ID ${node.id})`))
+                        })
                     }
                     break
                 default:
