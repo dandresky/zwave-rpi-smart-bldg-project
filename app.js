@@ -13,7 +13,8 @@ console.dir(argv);
 
 // Adjust the serial port depending on the platform you run this app
 const serialPort = argv.port || "/dev/ttyUSB0";
-const driver = new Driver(serialPort)
+let driver = new Driver(serialPort)
+let serialPortConnected = false
 
 const app = express()
 const port = 3001
@@ -45,6 +46,10 @@ const getCurrentTimeFormatted = () => {
 const timerIntervalFunction = () => {
     const currentTime = getCurrentTimeFormatted()
     outdoorLightSwitch.processSystemTimeEvent(driver, currentTime)
+    if(!serialPortConnected) {
+        driver = new Driver(serialPort)
+        startZwaveDriver()
+    }
 }
 
 setInterval(timerIntervalFunction, 60000)
@@ -55,111 +60,128 @@ setInterval(timerIntervalFunction, 60000)
 // Z-Wave Driver Events
 ////////////////////////////////////////////////////////////////////////////////////
 
-// You must add a handler for the error event before starting the driver
-driver.on("error", (e) => {
-    // Do something with it
-    console.error(e)
-});
 
-// "driver ready" event fired after controller interview is complete. We know the
-// nodes previously included, but they are still being interviewed.
-driver.once("driver ready", () => {
-    console.log("\'driver ready\' event fired")
-    console.log("  Network (controller) Home ID: " + driver.controller.homeId.toString())
-    driver.controller.nodes.forEach((node) => {
-        node.on("ready", async () => { 
-            console.log("\'ready\' event fired")
-            console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.basic.label));  
-            
-            node.on("value updated", async (node, args) => {
-                console.log("\'value updated\' node event fired with args: " + args)
-                outdoorLightSwitch.processValueUpdatedEvent(driver, node, args)
-            })
-
-            node.on("value notification", async (node, args) => {
-                console.log("\'value notification\' node event fired with args: " + args)
-                outdoorLightSwitch.processValueNotificationEvent(driver, node, args)
-            })
-
-            node.on("asleep", () => {
-                console.log("\'asleep\' node event fired")
-                // ToDo: When is this fired? By battery powered devices cycling off? What to do?
-            });
-
-            node.on("wakeup", () => {
-                console.log("\'wakeup\' node event fired")
-                // ToDo: When is this fired? By battery powered devices cycling on? What to do?
-            });
-        });
-    });
-
-    driver.controller.on("inclusion started", () => {
-        console.log("\'inclusion started\' controller event fired")
-        // ToDo: Do we care about this event?
-    });
-    
-    driver.controller.on("exclusion started", () => {
-        console.log("\'exclusion started\' controller event fired")
-        // ToDo: Do we care about this event?
-    });
-    
-    driver.controller.on("inclusion failed", () => {
-        console.log("\'inclusion failed\' controller event fired")
-        // ToDo: log a detailed message for this failure. Does this function get an error parameter?
-    });
-    
-    driver.controller.on("exclusion failed", () => {
-        console.log("\'exclusion failed\' controller event fired")
-        // ToDo: log a detailed message for this failure. Does this function get an error parameter?
-    });
-    
-    driver.controller.on("inclusion stopped", () => {
-        console.log("\'inclusion stopped\' controller event fired")
-    });
-    
-    driver.controller.on("exclusion stopped", () => {
-        console.log("\'exclusion stopped\' controller event fired")
-    });
-
-    driver.controller.on("node added", (node, result) => {
-        outdoorLightSwitch.processDeviceAddedEvent(node, result)
-    });
-
-    driver.controller.on("node removed", (node, replaced) => {
-        outdoorLightSwitch.processDeviceRemovedEvent(node, replaced)
-    });
-
-    driver.controller.on("heal network progress", () => {
-        console.log("\'heal network progress\' controller event fired")
-        // ToDo: this is fired when we request a status? This is future.
-    });
-
-    driver.controller.on("heal network done", () => {
-        console.log("\'heal network done\' controller event fired")
-        // ToDo: This is future
-    });
-
-    driver.controller.on("statistics updated", () => {
-        console.log("\'statistics updated\' controller event fired")
-        // ToDo: implement some detailed logs to show us the stats
-    });
-});
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Start the driver. To await this method, put this line into an async method
 ////////////////////////////////////////////////////////////////////////////////////
-(async () => {
-    await driver.start();
-})();
+async function startZwaveDriver() {
 
-for (const signal of ["SIGINT", "SIGTERM"]) {
-    process.on(signal, async () => {
-        await driver.destroy();
-        process.exit(0);
+    // You must add a handler for the error event before starting the driver
+    driver.on("error", (e) => {
+        // Do something with it
+        console.error(e)
     });
+
+    // "driver ready" event fired after controller interview is complete. We know the
+    // nodes previously included, but they are still being interviewed.
+    driver.once("driver ready", () => {
+        serialPortConnected = true
+        console.log("\'driver ready\' event fired")
+        console.log("  Network (controller) Home ID: " + driver.controller.homeId.toString())
+        driver.controller.nodes.forEach((node) => {
+            node.on("ready", async () => { 
+                console.log("\'ready\' event fired")
+                console.log("  Found Node ID: " + node.id + ", Device Class: " + JSON.stringify(node.deviceClass.basic.label));  
+                
+                node.on("value updated", async (node, args) => {
+                    console.log("\'value updated\' node event fired with args: " + args)
+                    outdoorLightSwitch.processValueUpdatedEvent(driver, node, args)
+                })
+
+                node.on("value notification", async (node, args) => {
+                    console.log("\'value notification\' node event fired with args: " + args)
+                    outdoorLightSwitch.processValueNotificationEvent(driver, node, args)
+                })
+
+                node.on("asleep", () => {
+                    console.log("\'asleep\' node event fired")
+                    // ToDo: When is this fired? By battery powered devices cycling off? What to do?
+                });
+
+                node.on("wakeup", () => {
+                    console.log("\'wakeup\' node event fired")
+                    // ToDo: When is this fired? By battery powered devices cycling on? What to do?
+                });
+            });
+        });
+
+        driver.controller.on("inclusion started", () => {
+            console.log("\'inclusion started\' controller event fired")
+            // ToDo: Do we care about this event?
+        });
+        
+        driver.controller.on("exclusion started", () => {
+            console.log("\'exclusion started\' controller event fired")
+            // ToDo: Do we care about this event?
+        });
+        
+        driver.controller.on("inclusion failed", () => {
+            console.log("\'inclusion failed\' controller event fired")
+            // ToDo: log a detailed message for this failure. Does this function get an error parameter?
+        });
+        
+        driver.controller.on("exclusion failed", () => {
+            console.log("\'exclusion failed\' controller event fired")
+            // ToDo: log a detailed message for this failure. Does this function get an error parameter?
+        });
+        
+        driver.controller.on("inclusion stopped", () => {
+            console.log("\'inclusion stopped\' controller event fired")
+        });
+        
+        driver.controller.on("exclusion stopped", () => {
+            console.log("\'exclusion stopped\' controller event fired")
+        });
+
+        driver.controller.on("node added", (node, result) => {
+            outdoorLightSwitch.processDeviceAddedEvent(node, result)
+        });
+
+        driver.controller.on("node removed", (node, replaced) => {
+            outdoorLightSwitch.processDeviceRemovedEvent(node, replaced)
+        });
+
+        driver.controller.on("heal network progress", () => {
+            console.log("\'heal network progress\' controller event fired")
+            // ToDo: this is fired when we request a status? This is future.
+        });
+
+        driver.controller.on("heal network done", () => {
+            console.log("\'heal network done\' controller event fired")
+            // ToDo: This is future
+        });
+
+        driver.controller.on("statistics updated", () => {
+            console.log("\'statistics updated\' controller event fired")
+            // ToDo: implement some detailed logs to show us the stats
+        });
+    });
+
+    (async () => {
+        try {
+            await driver.start();
+        } catch (error) {
+            console.log("Caught driver.start exception ... " + error);
+        } finally {
+            serialPortConnected = false
+            console.log("finally ... will try again in a minute")
+        }
+    })();
+
+    for (const signal of ["SIGINT", "SIGTERM"]) {
+        process.on(signal, async () => {
+            await driver.destroy();
+            process.exit(0);
+        });
+    }
 }
+
+
+
+startZwaveDriver()
 
 
 
@@ -265,6 +287,10 @@ const removeFailedNode = (nodeId) => {
 ////////////////////////////////////////////////////////////////////////////////////
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
+})
+
+app.get('/admin/status', async (req, res) => {
+    res.send("Serial Port Connected = " + serialPortConnected)
 })
 
 /**

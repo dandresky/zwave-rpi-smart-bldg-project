@@ -1,17 +1,7 @@
-# This will run on rPI with Raspian-Buster and node v16.13.1
-FROM node:16
-
-WORKDIR /app
-
-COPY package.json /app/package.json
-#COPY app.js /app/app.js
-#COPY app_modules /app/app_modules
-#COPY assets /app/assets
-
+FROM arm32v7/node:17.4-buster
+WORKDIR /zwave-app
+COPY package.json .
 RUN npm install
-
 COPY . .
-
-CMD node app.js
-
 EXPOSE 3001
+CMD ["node", "app.js"]

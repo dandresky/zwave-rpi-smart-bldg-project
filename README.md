@@ -48,6 +48,22 @@ The following links are useful for development:
 - [ZWaveJS Documentation](https://zwave-js.github.io/node-zwave-js/#/README)
 - [Vesternet - Understanding ZWave Networks](https://www.vesternet.com/pages/understanding-z-wave-networks-nodes-devices)
 
+## Docker Image Versions
+
+| Docker Hub Version | Description |
+| - | - |
+| doodles67/zwave-app-rpi:0.1 | Built with 17.4-buster - Xmas lights version - tried slim but had build issues |
+| doodles67/zwave-app-rpi:0.1.1 | Debugging serial port crash |
+
+## Docker Images Tested
+
+There are multiple base images to use for the dockerfile. Below are the ones tested:
+
+| Base Image | Size | Result |
+| - | - | - |
+| 17.4-buster | ~900MB | Unable to make a serial port connection |
+| 17.4-buster-slim | Unknown | Ran into build issues around the serialport library - I need to add a bunch of libs to make this work |
+
 # Usage
 
 Once the server is running the user can manage the network using a local React app on port 3002. This React app interfaces with the server through a custom Restful API listening on port 3001.
