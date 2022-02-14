@@ -165,9 +165,8 @@ async function startZwaveDriver() {
             await driver.start();
         } catch (error) {
             console.log("Caught driver.start exception ... " + error);
-        } finally {
             serialPortConnected = false
-            console.log("finally ... will try again in a minute")
+            console.log("Will try again in a minute")
         }
     })();
 
@@ -420,6 +419,16 @@ app.get('/network-management/devices/stop-exclusion', async (req, res) => {
 app.get('/network-management/tests/set-light-switch', async (req, res) => {
     outdoorLightSwitch.setLightSwitches(driver, req.query.newState)
     res.send("setLightSwitch has been called - did you see the expected change?")
+})
+
+app.get('/tty/reset-zwave-dongle-ttyusb0', async (req, res) => {
+    driver.softReset()
+    .then(function(result) {
+        res.send("Soft reset was successfule?")
+    })
+    .catch(function(err) {
+        res.send("Error soft resetting the zwave dongle: \n" + err)
+    })
 })
 
 
