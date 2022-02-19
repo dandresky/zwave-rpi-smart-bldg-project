@@ -17,7 +17,7 @@ let driver = new Driver(serialPort)
 let serialPortConnected = false
 
 const app = express()
-const port = 3001
+const port = 6769
 
 
 
@@ -53,14 +53,6 @@ const timerIntervalFunction = () => {
 }
 
 setInterval(timerIntervalFunction, 60000)
-
-
-
-////////////////////////////////////////////////////////////////////////////////////
-// Z-Wave Driver Events
-////////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 
@@ -177,8 +169,6 @@ async function startZwaveDriver() {
         });
     }
 }
-
-
 
 startZwaveDriver()
 

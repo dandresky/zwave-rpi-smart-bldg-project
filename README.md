@@ -10,7 +10,7 @@ This project consists of a Nodejs application running on any flavor of Linux tar
 
 Application summary:
 
-- A Nodejs server application with a Restful API that is exposed on port 3001.
+- A Nodejs server application with a Restful API that is exposed on port 6769.
 - Built on top of the [zwavejs](https://zwave-js.github.io/node-zwave-js/#/README) library.
 - Architecture based on idea of application modules that implement a usecase and expose metadata that can be managed dynamically.
 - A local React app that serves up pages allowing a user to configure the system and behavior of the application modules.
@@ -66,7 +66,7 @@ There are multiple base images to use for the dockerfile. Below are the ones tes
 
 # Usage
 
-Once the server is running the user can manage the network using a local React app on port 3002. This React app interfaces with the server through a custom Restful API listening on port 3001.
+Once the server is running the user can manage the network using a local React app. This React app interfaces with the server through a custom Restful API listening on port 6769.
 
 ## Restful API
 

@@ -3,5 +3,5 @@ WORKDIR /zwave-app
 COPY package.json .
 RUN npm install
 COPY . .
-EXPOSE 3001
+EXPOSE 6769
 CMD ["node", "app.js"]
