@@ -61,7 +61,7 @@ There are multiple base images to use for the dockerfile. Below are the ones tes
 
 | Base Image | Size | Result |
 | - | - | - |
-| 17.4-buster | ~900MB | Unable to make a serial port connection |
+| 17.4-buster | ~900MB | Works as needed |
 | 17.4-buster-slim | Unknown | Ran into build issues around the serialport library - I need to add a bunch of libs to make this work |
 
 # Usage
