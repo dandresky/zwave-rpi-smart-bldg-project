@@ -1,12 +1,8 @@
 # Introduction
 
-This repository contains all of the source code and documentation for a home/building automation project employing ZWave devices and a network controller implemented on a Raspberry Pi 4.
+This repository contains all of the source code and documentation for a home/building automation project employing ZWave devices and a network controller implemented on a Raspberry Pi 4. The following Zwave controller was used for development and testing:
 
-This project consists of a Nodejs application running on any flavor of Linux targetted for the RPi. For my development I used the default Raspbian OS based on Debian Buster.
-
-### License
-
-<ToDo: Add some license info here>
+USB Zwave controller hub from [Nortek](https://www.nortekcontrol.com/products/2gig/husbzb-1-gocontrol-quickstick-combo/)
 
 Application summary:
 
@@ -16,30 +12,9 @@ Application summary:
 - A local React app that serves up pages allowing a user to configure the system and behavior of the application modules.
 - Written entirely in Javascript.
 
-## Equipment Used for Development and Testing
+Deployment:
 
-- Raspberry Pi 4
-- uSD card with headless Raspbian (Debian Buster)
-- USB Zwave controller hub from [Nortek](https://www.nortekcontrol.com/products/2gig/husbzb-1-gocontrol-quickstick-combo/)
-
-The application can run on any platform that supports Nodejs, but the serial port mapping in app.js will have to be changed.
-
-## Getting Started
-
-- Prepare uSD card and install in rPI
-- Start up rPI with Nortek controller and ssh in
-- Sync the system time with the network (add a RTC someday)
-- Navigate to preferred working folder and clone this repository
-- run the following commands from the shell
-
-```sh
-git clone <repo url>
-cd <repo>
-npm install
-node app.js
-```
-
-The Node modules are not included in the git repository so we must run npm install after cloning to build them. The package.json file includes the list of packages that will be installed.
+The Zwave Smart Building App is designed to be deployed as a docker container, exposing port 6769.
 
 ## References
 
@@ -48,12 +23,13 @@ The following links are useful for development:
 - [ZWaveJS Documentation](https://zwave-js.github.io/node-zwave-js/#/README)
 - [Vesternet - Understanding ZWave Networks](https://www.vesternet.com/pages/understanding-z-wave-networks-nodes-devices)
 
-## Docker Image Versions
+## Application Version History
 
 | Docker Hub Version | Description |
 | - | - |
 | doodles67/zwave-app-rpi:0.1 | Built with 17.4-buster - Xmas lights version - tried slim but had build issues |
 | doodles67/zwave-app-rpi:0.1.1 | Debugging serial port crash |
+| doodles67/zwave-app-rpi:0.1.2 | Converting html responses to json |
 
 ## Docker Images Tested
 
@@ -62,17 +38,13 @@ There are multiple base images to use for the dockerfile. Below are the ones tes
 | Base Image | Size | Result |
 | - | - | - |
 | 17.4-buster | ~900MB | Works as needed |
-| 17.4-buster-slim | Unknown | Ran into build issues around the serialport library - I need to add a bunch of libs to make this work |
+| 17.4-buster-slim | Unknown | Ran into build issues around the serialport library - requires additional libs to make this work |
 
 # Usage
 
-Once the server is running the user can manage the network using a local React app. This React app interfaces with the server through a custom Restful API listening on port 6769.
+Once the server is running the user can manage the network through a custom Restful API listening on port 6769.
 
 ## Restful API
-
-As of the initial writing of this section the React app does not exist. The user must make API requests manually through tools such as Postman.
-
-The following requests are supported:
 
 - <span style="color:cyan">/network-management/devices/start-inclusion</span> 
 

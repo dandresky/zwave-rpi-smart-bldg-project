@@ -279,7 +279,8 @@ app.listen(port, () => {
 })
 
 app.get('/admin/status', async (req, res) => {
-    res.send('Serial Port Connected = ' + serialPortConnected)
+    //res.send('Serial Port Connected = ' + serialPortConnected)
+    res.json({isSerialPortConnected: serialPortConnected})
 })
 
 /**
