@@ -279,8 +279,12 @@ app.listen(port, () => {
 })
 
 app.get('/admin/status', async (req, res) => {
-    //res.send('Serial Port Connected = ' + serialPortConnected)
-    res.json({isSerialPortConnected: serialPortConnected})
+    //res.json({isSerialPortConnected: serialPortConnected})
+    let jsonData = {}
+    jsonData['isSerialPortConnected'] = serialPortConnected
+    jsonData['dummyDataOne'] = 'Dummy data 1'
+    jsonData['dummyDataTwo'] = {paramOne: 'one', paramTwo: 'two'}
+    res.json(jsonData)
 })
 
 /**
@@ -300,35 +304,15 @@ app.get('/admin/status', async (req, res) => {
 })
 
 app.get('/network-management/devices/audit-devices', (req, res) => {
-    let response = 'Device Audit Result:\n'
+    let jsonData = {}
     driver.controller.nodes.forEach(async (node) => {
-        response += 'Device Node ID: ' + node.id + '\n'
-        response += '- Name: ' + node.name + '\n'
-        response += '- Location: ' + node.location + '\n'
-        response += '- Basic Class: ' + node.deviceClass.basic.label + '\n'
-        response += '- Generic Class: ' + node.deviceClass.generic.label + '\n'
-        const status = node.status
-        switch(status) {
-            case 0: 
-                response += '- Status: Unknown\n' 
-                break;
-            case 1:
-                response += '- Status: Asleep\n' 
-                break;
-            case 2:
-                response += '- Status: Awake\n' 
-                break;
-            case 3:
-                response += '- Status: Dead\n' 
-                break;
-            case 4:
-                response += '- Status: Alive\n' 
-                break;
-            default:
-        }
+        jsonData[`deviceNode${node.id}`] = {name: node.name,
+                                            location: node.location,
+                                            basicClass: node.deviceClass.basic.label,
+                                            genericClass: node.deviceClass.generic.label
+                                        }
     })
-    response += 'End Device Audit'
-    res.send(response)
+    res.json(jsonData)
 })
 
 app.get('/network-management/devices/start-inclusion', async (req, res) => {

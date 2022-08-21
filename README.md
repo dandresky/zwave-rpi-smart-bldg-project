@@ -14,7 +14,7 @@ Application summary:
 
 Deployment:
 
-The Zwave Smart Building App is designed to be deployed as a docker container, exposing port 6769.
+The Zwave Smart Building App is designed to be deployed as a docker container, exposing port 6769. See the DOCKER-REFERENCE.md file in the RHUBARB-PI project for instructions on how to cross-compile for the rPI.
 
 ## References
 
@@ -24,6 +24,8 @@ The following links are useful for development:
 - [Vesternet - Understanding ZWave Networks](https://www.vesternet.com/pages/understanding-z-wave-networks-nodes-devices)
 
 ## Application Version History
+
+To deploy a new version, simply update the version string in the package.json file.
 
 | Docker Hub Version | Description |
 | - | - |
